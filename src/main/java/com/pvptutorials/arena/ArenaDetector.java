@@ -1,6 +1,7 @@
 package com.pvptutorials.arena;
 
 import java.util.Map;
+import java.util.Set;
 import javax.inject.Inject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -12,22 +13,28 @@ import net.runelite.api.events.VarbitChanged;
 /**
  * Detects entry and exit of Pete Kayer's instanced tutorial arenas.
  *
- * All Pete tutorials share the same base region (10588). The specific tutorial
- * is identified by a varbit that fires with value=1 shortly after entry.
- * See docs/pete-arena.md for the full mapping once all tutorials are observed.
+ * Five base tutorials share region 10588 and are identified by a varbit that fires
+ * value=1 shortly after entry. The final two (PENULTIMATE_CHALLENGE, FINAL_CHALLENGE)
+ * share region 11100 — no distinguishing varbit was observed for either; a follow-up
+ * using chat-message detection is needed to distinguish them.
+ * See docs/pete-arena.md for the full region/varbit mapping.
  */
 @Slf4j
 public class ArenaDetector
 {
-	// All Pete Kayer tutorial instances share this base region (Phase 1 finding).
-	static final int PETE_ARENA_REGION = 10588;
+	// Regions used by Pete Kayer tutorial instances (Phase 1 finding).
+	// 10588 — five regular tutorials (identified by varbit).
+	// 11100 — PENULTIMATE_CHALLENGE and FINAL_CHALLENGE (no distinguishing varbit found).
+	static final Set<Integer> PETE_ARENA_REGIONS = Set.of(10588, 11100);
 
-	// Varbit ID → BaseTutorial: fires value=1 on arena entry, identifies which tutorial.
-	// Incomplete — only GEAR_SWITCHING and SPECIAL_ATTACKS observed so far.
-	// Run the remaining 5 tutorials with debug enabled to populate the rest.
+	// Varbit ID → BaseTutorial: fires value=1 on arena entry for the 10588 tutorials.
+	// PENULTIMATE_CHALLENGE and FINAL_CHALLENGE (region 11100) have no entry in this map.
 	private static final Map<Integer, BaseTutorial> VARBIT_TO_BASE = Map.of(
-		16309, BaseTutorial.GEAR_SWITCHING,    // varpId=5889
-		16303, BaseTutorial.SPECIAL_ATTACKS    // varpId=5888
+		16309, BaseTutorial.GEAR_SWITCHING,     // varpId=5889
+		16303, BaseTutorial.SPECIAL_ATTACKS,    // varpId=5888
+		10670, BaseTutorial.PRAYER_PROTECTION,  // varpId=1021
+		16306, BaseTutorial.POWER_OF_FREEZES,   // varpId=5888
+		16315, BaseTutorial.COMBO_EATING        // varpId=5890
 	);
 
 	@Inject
@@ -56,7 +63,7 @@ public class ArenaDetector
 		log.debug("Region changed: {} -> {}", lastRegionId, regionId);
 		lastRegionId = regionId;
 
-		if (regionId == PETE_ARENA_REGION)
+		if (PETE_ARENA_REGIONS.contains(regionId))
 		{
 			if (!session.isInside())
 			{

@@ -47,7 +47,7 @@ tasks.register('run', JavaExec) {
 	classpath = sourceSets.test.runtimeClasspath
 	mainClass = pluginMainClass
 
-	jvmArgs "-ea"
+	jvmArgs "-ea", "-Xmx2g", "-Xms512m"
 	args "--developer-mode", "--debug"
 }
 
