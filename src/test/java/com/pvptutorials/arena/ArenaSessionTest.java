@@ -64,6 +64,20 @@ public class ArenaSessionTest
 	}
 
 	@Test
+	public void enterWithNullBaseThenSetDetectedBase()
+	{
+		session.selectTutorial(TutorialId.DEVELOPER_TEST, BaseTutorial.GEAR_SWITCHING);
+		session.enter(10588, null, 100);
+		assertTrue(session.isInside());
+		assertNull(session.getDetectedBase());
+		assertFalse(session.baseMatchesPending());
+
+		session.setDetectedBase(BaseTutorial.GEAR_SWITCHING);
+		assertEquals(BaseTutorial.GEAR_SWITCHING, session.getDetectedBase());
+		assertTrue(session.baseMatchesPending());
+	}
+
+	@Test
 	public void activatePromotesPendingToActive()
 	{
 		session.selectTutorial(TutorialId.DEVELOPER_TEST, BaseTutorial.GEAR_SWITCHING);

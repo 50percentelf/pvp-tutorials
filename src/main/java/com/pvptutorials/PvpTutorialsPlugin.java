@@ -132,6 +132,7 @@ public class PvpTutorialsPlugin extends Plugin
 	public void onVarbitChanged(VarbitChanged event)
 	{
 		debugTracker.onVarbitChanged(event, config.logVarbits());
+		arenaDetector.onVarbitChanged(event);
 	}
 
 	@Subscribe

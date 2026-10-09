@@ -13,8 +13,8 @@ import net.runelite.api.Client;
 @Slf4j
 public class PeteTutorialMenu
 {
-	// Set after Phase 1 widget discovery. -1 = not yet known.
-	static final int PETE_INTERFACE_GROUP = -1;
+	// Found via Phase 1 widget discovery (widget group 970, 512×334).
+	static final int PETE_INTERFACE_GROUP = 970;
 
 	@Inject
 	private Client client;

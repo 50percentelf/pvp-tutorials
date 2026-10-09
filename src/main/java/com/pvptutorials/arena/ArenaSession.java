@@ -81,6 +81,11 @@ public class ArenaSession
 		return pendingTutorialId != null;
 	}
 
+	public void setDetectedBase(BaseTutorial base)
+	{
+		detectedBase = base;
+	}
+
 	/** True when the arena we entered matches the base the pending tutorial requires. */
 	public boolean baseMatchesPending()
 	{
