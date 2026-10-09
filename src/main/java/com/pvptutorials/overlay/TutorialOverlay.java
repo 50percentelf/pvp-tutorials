@@ -51,6 +51,15 @@ public class TutorialOverlay extends Overlay
 				.left("State: " + state)
 				.leftColor(Color.CYAN)
 				.build());
+
+			String instruction = tutorialManager.getActiveTutorial().getActiveInstruction();
+			if (instruction != null)
+			{
+				panel.getChildren().add(LineComponent.builder()
+					.left(instruction)
+					.leftColor(Color.GREEN)
+					.build());
+			}
 		}
 
 		return panel.render(graphics);

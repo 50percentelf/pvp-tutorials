@@ -1,5 +1,7 @@
 package com.pvptutorials.menu;
 
+import com.pvptutorials.tutorial.TutorialId;
+import com.pvptutorials.tutorial.TutorialManager;
 import com.pvptutorials.tutorial.TutorialRegistry;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +23,9 @@ public class PeteTutorialMenu
 
 	@Inject
 	private TutorialRegistry registry;
+
+	@Inject
+	private TutorialManager tutorialManager;
 
 	private boolean injected = false;
 
@@ -49,7 +54,10 @@ public class PeteTutorialMenu
 		{
 			return;
 		}
-		// Phase 2: add custom widget children to Pete's interface after structure is mapped.
+		// Auto-select DEVELOPER_TEST when Pete's menu opens.
+		// Phase 3: replace with real widget buttons once the interface structure is mapped.
+		tutorialManager.requestTutorial(TutorialId.DEVELOPER_TEST);
+		log.debug("Auto-selected DEVELOPER_TEST via Pete menu trigger");
 		injected = true;
 	}
 

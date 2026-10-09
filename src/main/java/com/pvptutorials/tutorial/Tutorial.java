@@ -28,4 +28,10 @@ public interface Tutorial
 
 	/** Fully stops and cleans up the tutorial. */
 	void stop();
+
+	/** Returns the instruction text for the current step, or null if none. */
+	default String getActiveInstruction()
+	{
+		return null;
+	}
 }

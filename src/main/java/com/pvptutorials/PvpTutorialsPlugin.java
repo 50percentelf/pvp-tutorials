@@ -2,11 +2,15 @@ package com.pvptutorials;
 
 import com.google.inject.Provides;
 import com.pvptutorials.arena.ArenaDetector;
+import com.pvptutorials.arena.BaseTutorial;
 import com.pvptutorials.debug.PeteDebugTracker;
 import com.pvptutorials.menu.PeteTutorialMenu;
 import com.pvptutorials.overlay.DebugOverlay;
 import com.pvptutorials.overlay.TutorialOverlay;
 import com.pvptutorials.simulation.SimulationEngine;
+import com.pvptutorials.tutorial.DeveloperTestTutorial;
+import com.pvptutorials.tutorial.TutorialDefinition;
+import com.pvptutorials.tutorial.TutorialId;
 import com.pvptutorials.tutorial.TutorialManager;
 import com.pvptutorials.tutorial.TutorialRegistry;
 import javax.inject.Inject;
@@ -35,24 +39,34 @@ import net.runelite.client.ui.overlay.OverlayManager;
 )
 public class PvpTutorialsPlugin extends Plugin
 {
-	@Inject private Client             client;
-	@Inject private PvpTutorialsConfig config;
-	@Inject private OverlayManager     overlayManager;
-	@Inject private PeteDebugTracker   debugTracker;
-	@Inject private ArenaDetector      arenaDetector;
-	@Inject private TutorialManager    tutorialManager;
-	@Inject private TutorialRegistry   tutorialRegistry;
-	@Inject private PeteTutorialMenu   peteTutorialMenu;
-	@Inject private SimulationEngine   simulationEngine;
-	@Inject private DebugOverlay       debugOverlay;
-	@Inject private TutorialOverlay    tutorialOverlay;
+	@Inject private Client                 client;
+	@Inject private PvpTutorialsConfig     config;
+	@Inject private OverlayManager         overlayManager;
+	@Inject private PeteDebugTracker       debugTracker;
+	@Inject private ArenaDetector          arenaDetector;
+	@Inject private TutorialManager        tutorialManager;
+	@Inject private TutorialRegistry       tutorialRegistry;
+	@Inject private PeteTutorialMenu       peteTutorialMenu;
+	@Inject private SimulationEngine       simulationEngine;
+	@Inject private DebugOverlay           debugOverlay;
+	@Inject private TutorialOverlay        tutorialOverlay;
+	@Inject private DeveloperTestTutorial  developerTestTutorial;
 
 	@Override
 	protected void startUp() throws Exception
 	{
 		overlayManager.add(debugOverlay);
 		overlayManager.add(tutorialOverlay);
+		registerTutorials();
 		log.info("PvP Tutorials started");
+	}
+
+	private void registerTutorials()
+	{
+		tutorialRegistry.define(new TutorialDefinition(
+			TutorialId.DEVELOPER_TEST, BaseTutorial.GEAR_SWITCHING,
+			"Developer Test", "Proves the full plugin architecture end-to-end"));
+		tutorialRegistry.register(developerTestTutorial);
 	}
 
 	@Override
