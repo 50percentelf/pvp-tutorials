@@ -78,7 +78,7 @@ public class ArenaDetector
 		{
 			log.debug("Exited Pete arena (was {})", session.getDetectedBase());
 			session.exit();
-			session.reset();
+			session.resetArena();
 		}
 	}
 

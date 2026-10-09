@@ -55,15 +55,26 @@ public class ArenaSession
 		arenaState = ArenaState.EXITING;
 	}
 
+	/**
+	 * Resets only the per-visit arena state. The pending tutorial selection is
+	 * intentionally preserved so the next arena entry re-activates it automatically.
+	 * Call {@link #reset()} on logout/hop to also clear the selection.
+	 */
+	public void resetArena()
+	{
+		arenaState       = ArenaState.OUTSIDE;
+		activeTutorialId = null;
+		detectedBase     = null;
+		arenaRegionId    = -1;
+		entryTick        = -1;
+	}
+
+	/** Full reset including tutorial selection — use on logout or world hop. */
 	public void reset()
 	{
-		arenaState        = ArenaState.OUTSIDE;
+		resetArena();
 		pendingTutorialId = null;
-		activeTutorialId  = null;
 		requiredBase      = null;
-		detectedBase      = null;
-		arenaRegionId     = -1;
-		entryTick         = -1;
 	}
 
 	public boolean isInside()

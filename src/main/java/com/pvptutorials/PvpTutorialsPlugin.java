@@ -58,6 +58,12 @@ public class PvpTutorialsPlugin extends Plugin
 		overlayManager.add(debugOverlay);
 		overlayManager.add(tutorialOverlay);
 		registerTutorials();
+		// If already logged in (hot-reload), pre-select immediately; otherwise the
+		// LOGGED_IN handler below fires after the login reset clears any earlier selection.
+		if (client.getGameState() == GameState.LOGGED_IN)
+		{
+			tutorialManager.requestTutorial(TutorialId.DEVELOPER_TEST);
+		}
 		log.info("PvP Tutorials started");
 	}
 
@@ -67,9 +73,6 @@ public class PvpTutorialsPlugin extends Plugin
 			TutorialId.DEVELOPER_TEST, BaseTutorial.GEAR_SWITCHING,
 			"Developer Test", "Proves the full plugin architecture end-to-end"));
 		tutorialRegistry.register(developerTestTutorial);
-		// Pre-select on startup so the tutorial is queued even if Pete's menu was already
-		// open during a hot-reload. Phase 3: remove when real menu buttons exist.
-		tutorialManager.requestTutorial(TutorialId.DEVELOPER_TEST);
 	}
 
 	@Override
@@ -94,6 +97,10 @@ public class PvpTutorialsPlugin extends Plugin
 			tutorialManager.stopActiveTutorial();
 			simulationEngine.reset();
 			debugTracker.reset();
+		}
+		if (event.getGameState() == GameState.LOGGED_IN)
+		{
+			tutorialManager.requestTutorial(TutorialId.DEVELOPER_TEST);
 		}
 	}
 
