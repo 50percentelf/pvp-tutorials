@@ -2,11 +2,13 @@ package com.pvptutorials.tutorial;
 
 import com.pvptutorials.arena.ArenaDetector;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.events.MenuOptionClicked;
 
 @Slf4j
+@Singleton
 public class TutorialManager
 {
 	@Inject

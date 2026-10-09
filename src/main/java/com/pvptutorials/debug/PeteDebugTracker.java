@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
@@ -21,6 +22,7 @@ import net.runelite.api.widgets.Widget;
  * All logging is behind config flags — enable in the plugin's Debug config section.
  */
 @Slf4j
+@Singleton
 public class PeteDebugTracker
 {
 	private static final int RECENT_WIDGET_MAX = 10;

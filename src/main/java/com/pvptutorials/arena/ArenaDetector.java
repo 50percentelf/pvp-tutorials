@@ -3,6 +3,7 @@ package com.pvptutorials.arena;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
@@ -20,6 +21,7 @@ import net.runelite.api.events.VarbitChanged;
  * See docs/pete-arena.md for the full region/varbit mapping.
  */
 @Slf4j
+@Singleton
 public class ArenaDetector
 {
 	// Regions used by Pete Kayer tutorial instances (Phase 1 finding).

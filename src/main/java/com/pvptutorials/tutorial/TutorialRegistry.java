@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.inject.Singleton;
 
 /**
  * Central registry for all custom tutorials.
@@ -14,6 +15,7 @@ import java.util.Map;
  *  - implementations: Tutorial objects for tutorials that are actually runnable.
  *    Only DEVELOPER_TEST is expected to be implemented initially.
  */
+@Singleton
 public class TutorialRegistry
 {
 	private final Map<TutorialId, TutorialDefinition> definitions    = new LinkedHashMap<>();
