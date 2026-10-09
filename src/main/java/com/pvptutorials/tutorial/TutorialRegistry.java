@@ -6,30 +6,51 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Central registry of all available custom tutorials.
- * Only DEVELOPER_TEST is functional in Phase 5; others are placeholders.
+ * Central registry for all custom tutorials.
+ *
+ * Two separate maps:
+ *  - definitions: metadata for ALL tutorials (including unimplemented placeholders).
+ *    Used for menu generation.
+ *  - implementations: Tutorial objects for tutorials that are actually runnable.
+ *    Only DEVELOPER_TEST is expected to be implemented initially.
  */
 public class TutorialRegistry
 {
-	private final Map<TutorialId, Tutorial> tutorials = new LinkedHashMap<>();
+	private final Map<TutorialId, TutorialDefinition> definitions    = new LinkedHashMap<>();
+	private final Map<TutorialId, Tutorial>           implementations = new LinkedHashMap<>();
+
+	public void define(TutorialDefinition definition)
+	{
+		definitions.put(definition.getId(), definition);
+	}
 
 	public void register(Tutorial tutorial)
 	{
-		tutorials.put(tutorial.getId(), tutorial);
+		implementations.put(tutorial.getId(), tutorial);
 	}
 
-	public Tutorial get(TutorialId id)
+	public TutorialDefinition getDefinition(TutorialId id)
 	{
-		return tutorials.get(id);
+		return definitions.get(id);
 	}
 
-	public Collection<Tutorial> getAll()
+	public Tutorial getImplementation(TutorialId id)
 	{
-		return Collections.unmodifiableCollection(tutorials.values());
+		return implementations.get(id);
 	}
 
-	public boolean contains(TutorialId id)
+	public Collection<TutorialDefinition> getAllDefinitions()
 	{
-		return tutorials.containsKey(id);
+		return Collections.unmodifiableCollection(definitions.values());
+	}
+
+	public boolean isDefined(TutorialId id)
+	{
+		return definitions.containsKey(id);
+	}
+
+	public boolean isImplemented(TutorialId id)
+	{
+		return implementations.containsKey(id);
 	}
 }

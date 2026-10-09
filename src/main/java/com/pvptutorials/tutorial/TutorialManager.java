@@ -20,13 +20,19 @@ public class TutorialManager
 
 	public void requestTutorial(TutorialId id)
 	{
-		if (!registry.contains(id))
+		TutorialDefinition def = registry.getDefinition(id);
+		if (def == null)
 		{
-			log.warn("Requested unknown tutorial: {}", id);
+			log.warn("Requested undefined tutorial: {}", id);
 			return;
 		}
-		arenaDetector.getSession().selectTutorial(id);
-		log.debug("Tutorial selected: {}", id);
+		if (!registry.isImplemented(id))
+		{
+			log.warn("Tutorial not yet implemented: {}", id);
+			return;
+		}
+		arenaDetector.getSession().selectTutorial(id, def.getRequiredBase());
+		log.debug("Tutorial selected: {} (requires base={})", id, def.getRequiredBase());
 	}
 
 	public void onArenaActivated()
@@ -36,7 +42,7 @@ public class TutorialManager
 		{
 			return;
 		}
-		Tutorial tutorial = registry.get(id);
+		Tutorial tutorial = registry.getImplementation(id);
 		if (tutorial == null)
 		{
 			log.warn("No implementation for tutorial: {}", id);

@@ -1,5 +1,7 @@
 package com.pvptutorials.arena;
 
+import java.util.Collections;
+import java.util.Map;
 import javax.inject.Inject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -9,13 +11,18 @@ import net.runelite.api.coords.WorldPoint;
 
 /**
  * Detects entry and exit of Pete Kayer's instanced tutorial arenas.
- * Region IDs are populated during Phase 1 instrumentation — see docs/pete-arena.md.
+ *
+ * REGION_TO_BASE maps region ID → BaseTutorial.
+ * Populated during Phase 1/2 research — see docs/pete-arena.md and docs/pete-capabilities.md.
+ * Each BaseTutorial may have multiple region IDs (instanced regions share geometry
+ * but have unique IDs per instance).
  */
 @Slf4j
 public class ArenaDetector
 {
-	// Populated after Phase 1 arena lifecycle discovery.
-	private static final int[] PETE_ARENA_REGIONS = {};
+	// Populated after Phase 1/2 arena lifecycle discovery.
+	// Key: region ID   Value: which Jagex tutorial corresponds to that region
+	private static final Map<Integer, BaseTutorial> REGION_TO_BASE = Collections.emptyMap();
 
 	@Inject
 	private Client client;
@@ -35,32 +42,42 @@ public class ArenaDetector
 		WorldPoint pos = WorldPoint.fromLocalInstance(client, client.getLocalPlayer().getLocalLocation());
 		int regionId = pos.getRegionID();
 
-		if (regionId != lastRegionId)
+		if (regionId == lastRegionId)
 		{
-			log.debug("Region changed: {} -> {}", lastRegionId, regionId);
-			lastRegionId = regionId;
+			return;
+		}
 
-			if (isPeteArenaRegion(regionId))
+		log.debug("Region changed: {} -> {}", lastRegionId, regionId);
+		lastRegionId = regionId;
+
+		BaseTutorial detected = REGION_TO_BASE.get(regionId);
+
+		if (detected != null)
+		{
+			if (!session.isInside())
 			{
-				if (!session.isInside())
-				{
-					int tick = client.getTickCount();
-					session.enter(regionId, tick);
-					log.debug("Entered Pete arena region {} at tick {}", regionId, tick);
+				int tick = client.getTickCount();
+				session.enter(regionId, detected, tick);
+				log.debug("Entered Pete arena region {} ({}) at tick {}", regionId, detected, tick);
 
-					if (session.hasPendingTutorial())
-					{
-						session.activate();
-						log.debug("Custom tutorial activated: {}", session.getActiveTutorialId());
-					}
+				if (session.hasPendingTutorial() && session.baseMatchesPending())
+				{
+					session.activate();
+					log.debug("Custom tutorial activated: {} (base={})",
+						session.getActiveTutorialId(), detected);
+				}
+				else if (session.hasPendingTutorial())
+				{
+					log.debug("Entered wrong base for pending tutorial {} (needed {}, got {})",
+						session.getPendingTutorialId(), session.getRequiredBase(), detected);
 				}
 			}
-			else if (session.isInside())
-			{
-				log.debug("Exited Pete arena region");
-				session.exit();
-				session.reset();
-			}
+		}
+		else if (session.isInside())
+		{
+			log.debug("Exited Pete arena region (was {})", session.getDetectedBase());
+			session.exit();
+			session.reset();
 		}
 	}
 
@@ -77,17 +94,5 @@ public class ArenaDetector
 	{
 		lastRegionId = -1;
 		session.reset();
-	}
-
-	private boolean isPeteArenaRegion(int regionId)
-	{
-		for (int r : PETE_ARENA_REGIONS)
-		{
-			if (r == regionId)
-			{
-				return true;
-			}
-		}
-		return false;
 	}
 }
