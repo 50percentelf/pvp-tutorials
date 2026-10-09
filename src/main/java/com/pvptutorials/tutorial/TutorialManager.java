@@ -24,6 +24,8 @@ public class TutorialManager
 
 	@Getter
 	private Tutorial activeTutorial = null;
+	@Getter
+	private boolean arenaInitiated = false;
 
 	public void requestTutorial(TutorialId id)
 	{
@@ -42,6 +44,28 @@ public class TutorialManager
 		log.debug("Tutorial selected: {} (requires base={})", id, meta.getRequiredBase());
 	}
 
+	/**
+	 * Starts a tutorial immediately without waiting for arena entry.
+	 * Used by client-side menu entries that don't trigger a server teleport.
+	 */
+	public void startTutorial(TutorialId id)
+	{
+		Tutorial tutorial = registry.getImplementation(id);
+		if (tutorial == null)
+		{
+			log.warn("No implementation for tutorial: {}", id);
+			return;
+		}
+		if (activeTutorial != null)
+		{
+			activeTutorial.stop();
+		}
+		activeTutorial = tutorial;
+		activeTutorial.start();
+		arenaInitiated = false;
+		log.debug("Tutorial started directly: {}", id);
+	}
+
 	public void onArenaActivated()
 	{
 		TutorialId id = arenaDetector.getSession().getActiveTutorialId();
@@ -57,6 +81,7 @@ public class TutorialManager
 		}
 		activeTutorial = tutorial;
 		activeTutorial.start();
+		arenaInitiated = true;
 		log.debug("Tutorial started: {}", id);
 	}
 
@@ -101,6 +126,7 @@ public class TutorialManager
 		{
 			activeTutorial.stop();
 			activeTutorial = null;
+			arenaInitiated = false;
 		}
 	}
 

@@ -5,10 +5,12 @@ import com.pvptutorials.arena.ArenaDetector;
 import com.pvptutorials.debug.PeteDebugTracker;
 import com.pvptutorials.menu.PeteTutorialMenu;
 import com.pvptutorials.overlay.DebugOverlay;
+import com.pvptutorials.overlay.PeteChallengeDetailOverlay;
 import com.pvptutorials.overlay.TutorialOverlay;
 import com.pvptutorials.simulation.SimulationEngine;
 import com.pvptutorials.tutorial.BuiltInTutorials;
 import com.pvptutorials.tutorial.DeveloperTestTutorial;
+import com.pvptutorials.tutorial.RangeToStaffTutorial;
 import com.pvptutorials.tutorial.TutorialId;
 import com.pvptutorials.tutorial.TutorialManager;
 import com.pvptutorials.tutorial.TutorialRegistry;
@@ -17,8 +19,10 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.events.ChatMessage;
+import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.MenuOpened;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.NpcSpawned;
@@ -47,15 +51,19 @@ public class PvpTutorialsPlugin extends Plugin
 	@Inject private TutorialRegistry       tutorialRegistry;
 	@Inject private PeteTutorialMenu       peteTutorialMenu;
 	@Inject private SimulationEngine       simulationEngine;
-	@Inject private DebugOverlay           debugOverlay;
-	@Inject private TutorialOverlay        tutorialOverlay;
+	@Inject private DebugOverlay              debugOverlay;
+	@Inject private TutorialOverlay           tutorialOverlay;
+	@Inject private PeteChallengeDetailOverlay peteChallengeDetailOverlay;
 	@Inject private DeveloperTestTutorial  developerTestTutorial;
+	@Inject private RangeToStaffTutorial   rangeToStaffTutorial;
 
 	@Override
 	protected void startUp() throws Exception
 	{
 		overlayManager.add(debugOverlay);
 		overlayManager.add(tutorialOverlay);
+		overlayManager.add(peteChallengeDetailOverlay);
+		peteTutorialMenu.startListening();
 		registerTutorials();
 		if (client.getGameState() == GameState.LOGGED_IN && config.autoSelectDevTest())
 		{
@@ -68,6 +76,7 @@ public class PvpTutorialsPlugin extends Plugin
 	{
 		BuiltInTutorials.ALL.forEach(tutorialRegistry::define);
 		tutorialRegistry.register(developerTestTutorial);
+		tutorialRegistry.register(rangeToStaffTutorial);
 	}
 
 	@Override
@@ -75,6 +84,8 @@ public class PvpTutorialsPlugin extends Plugin
 	{
 		overlayManager.remove(debugOverlay);
 		overlayManager.remove(tutorialOverlay);
+		overlayManager.remove(peteChallengeDetailOverlay);
+		peteTutorialMenu.stopListening();
 		tutorialManager.stopActiveTutorial();
 		arenaDetector.reset();
 		simulationEngine.reset();
@@ -102,6 +113,7 @@ public class PvpTutorialsPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick event)
 	{
+		peteTutorialMenu.onGameTick();
 		arenaDetector.onGameTick();
 
 		if (arenaDetector.getSession().isActive()
@@ -112,7 +124,8 @@ public class PvpTutorialsPlugin extends Plugin
 		}
 
 		if (!arenaDetector.getSession().isInside()
-			&& tutorialManager.getActiveTutorial() != null)
+			&& tutorialManager.getActiveTutorial() != null
+			&& tutorialManager.isArenaInitiated())
 		{
 			tutorialManager.stopActiveTutorial();
 			simulationEngine.reset();
@@ -120,6 +133,12 @@ public class PvpTutorialsPlugin extends Plugin
 
 		tutorialManager.onGameTick();
 		simulationEngine.onGameTick();
+	}
+
+	@Subscribe
+	public void onClientTick(ClientTick event)
+	{
+		peteTutorialMenu.onClientTick();
 	}
 
 	@Subscribe
@@ -155,8 +174,15 @@ public class PvpTutorialsPlugin extends Plugin
 	}
 
 	@Subscribe
+	public void onMenuOpened(MenuOpened event)
+	{
+		peteTutorialMenu.onMenuOpened(event);
+	}
+
+	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
+		peteTutorialMenu.onMenuOptionClicked(event);
 		tutorialManager.onMenuOptionClicked(event);
 	}
 

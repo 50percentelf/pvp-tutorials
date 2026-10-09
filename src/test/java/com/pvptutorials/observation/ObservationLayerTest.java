@@ -42,6 +42,14 @@ public class ObservationLayerTest
 	}
 
 	@Test
+	public void attackProducesAttackStarted()
+	{
+		Optional<TutorialEvent> result = layer.fromMenuOptionClicked(menuClick("Attack"));
+		assertTrue(result.isPresent());
+		assertEquals(TutorialEventType.ATTACK_STARTED, result.get().getType());
+	}
+
+	@Test
 	public void useOptionProducesEmpty()
 	{
 		Optional<TutorialEvent> result = layer.fromMenuOptionClicked(menuClick("Use"));

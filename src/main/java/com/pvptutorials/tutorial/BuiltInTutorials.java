@@ -57,8 +57,8 @@ public final class BuiltInTutorials
 			"Switch from ranged to staff",
 			SWITCHING, BEGINNER,
 			List.of("switching", "range", "staff", "mage", "one-way"),
-			GEAR_SWITCHING, // pending confirmation
-			PLACEHOLDER),
+			GEAR_SWITCHING,
+			IMPLEMENTED),
 
 		meta(STAFF_TO_RANGE,
 			"Staff → Range",

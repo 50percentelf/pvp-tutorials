@@ -20,9 +20,14 @@ public class ObservationLayer
 
 	public Optional<TutorialEvent> fromMenuOptionClicked(MenuOptionClicked event)
 	{
-		if (EQUIP_OPTIONS.contains(event.getMenuOption()))
+		String option = event.getMenuOption();
+		if (EQUIP_OPTIONS.contains(option))
 		{
 			return Optional.of(new TutorialEvent(TutorialEventType.ITEM_EQUIPPED));
+		}
+		if ("Attack".equals(option))
+		{
+			return Optional.of(new TutorialEvent(TutorialEventType.ATTACK_STARTED));
 		}
 		return Optional.empty();
 	}
