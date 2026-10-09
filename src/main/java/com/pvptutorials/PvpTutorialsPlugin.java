@@ -67,6 +67,9 @@ public class PvpTutorialsPlugin extends Plugin
 			TutorialId.DEVELOPER_TEST, BaseTutorial.GEAR_SWITCHING,
 			"Developer Test", "Proves the full plugin architecture end-to-end"));
 		tutorialRegistry.register(developerTestTutorial);
+		// Pre-select on startup so the tutorial is queued even if Pete's menu was already
+		// open during a hot-reload. Phase 3: remove when real menu buttons exist.
+		tutorialManager.requestTutorial(TutorialId.DEVELOPER_TEST);
 	}
 
 	@Override
