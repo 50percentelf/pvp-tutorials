@@ -1,7 +1,7 @@
 package com.pvptutorials.tutorial;
 
 import com.pvptutorials.arena.BaseTutorial;
-import net.runelite.api.events.MenuOptionClicked;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -16,45 +16,41 @@ public class TutorialRegistryTest
 		registry = new TutorialRegistry();
 	}
 
-	// ── TutorialDefinition ────────────────────────────────────────────────────
+	// ── TutorialMetadata ──────────────────────────────────────────────────────
 
 	@Test
-	public void definedTutorialIsRetrievable()
+	public void definedMetadataIsRetrievable()
 	{
-		TutorialDefinition def = new TutorialDefinition(
-			TutorialId.DEVELOPER_TEST, BaseTutorial.GEAR_SWITCHING,
-			"Developer Test", "Proves architecture");
-		registry.define(def);
-		assertSame(def, registry.getDefinition(TutorialId.DEVELOPER_TEST));
+		TutorialMetadata meta = meta(TutorialId.DEVELOPER_TEST, BaseTutorial.GEAR_SWITCHING, "Developer Test", "Proves architecture");
+		registry.define(meta);
+		assertSame(meta, registry.getMetadata(TutorialId.DEVELOPER_TEST));
 		assertTrue(registry.isDefined(TutorialId.DEVELOPER_TEST));
 	}
 
 	@Test
 	public void undefinedIdReturnsNull()
 	{
-		assertNull(registry.getDefinition(TutorialId.RANGE_TO_STAFF));
+		assertNull(registry.getMetadata(TutorialId.RANGE_TO_STAFF));
 		assertFalse(registry.isDefined(TutorialId.RANGE_TO_STAFF));
 	}
 
 	@Test
-	public void getAllDefinitionsReflectsInsertionOrder()
+	public void getAllMetadataReflectsInsertionOrder()
 	{
-		TutorialDefinition d1 = new TutorialDefinition(
-			TutorialId.DEVELOPER_TEST, BaseTutorial.GEAR_SWITCHING, "Dev", "");
-		TutorialDefinition d2 = new TutorialDefinition(
-			TutorialId.RANGE_TO_STAFF, BaseTutorial.GEAR_SWITCHING, "R2S", "");
-		registry.define(d1);
-		registry.define(d2);
-		TutorialDefinition[] all = registry.getAllDefinitions().toArray(new TutorialDefinition[0]);
+		TutorialMetadata m1 = meta(TutorialId.DEVELOPER_TEST, BaseTutorial.GEAR_SWITCHING, "Dev", "");
+		TutorialMetadata m2 = meta(TutorialId.RANGE_TO_STAFF, BaseTutorial.GEAR_SWITCHING, "R2S", "");
+		registry.define(m1);
+		registry.define(m2);
+		TutorialMetadata[] all = registry.getAllMetadata().toArray(new TutorialMetadata[0]);
 		assertEquals(2, all.length);
 		assertEquals(TutorialId.DEVELOPER_TEST, all[0].getId());
 		assertEquals(TutorialId.RANGE_TO_STAFF, all[1].getId());
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
-	public void getAllDefinitionsIsUnmodifiable()
+	public void getAllMetadataIsUnmodifiable()
 	{
-		registry.getAllDefinitions().clear();
+		registry.getAllMetadata().clear();
 	}
 
 	// ── Tutorial implementations ───────────────────────────────────────────────
@@ -78,27 +74,57 @@ public class TutorialRegistryTest
 	@Test
 	public void definedButUnimplementedShowsDefined()
 	{
-		TutorialDefinition def = new TutorialDefinition(
-			TutorialId.BOLT_GMAUL_AGS, BaseTutorial.SPECIAL_ATTACKS, "Bolt→Gmaul→AGS", "");
-		registry.define(def);
+		TutorialMetadata m = meta(TutorialId.BOLT_GMAUL_AGS, BaseTutorial.SPECIAL_ATTACKS, "Bolt→Gmaul→AGS", "");
+		registry.define(m);
 		assertTrue(registry.isDefined(TutorialId.BOLT_GMAUL_AGS));
 		assertFalse(registry.isImplemented(TutorialId.BOLT_GMAUL_AGS));
 	}
 
+	// ── search delegation ──────────────────────────────────────────────────────
+
+	@Test
+	public void searchDelegatesFilterCorrectly()
+	{
+		registry.define(meta(TutorialId.BOLT_GMAUL_AGS, BaseTutorial.SPECIAL_ATTACKS, "Bolt→Gmaul→AGS", ""));
+		registry.define(TutorialMetadata.builder()
+			.id(TutorialId.DEVELOPER_TEST)
+			.displayName("Developer Test").description("")
+			.category(TutorialCategory.FUNDAMENTALS)
+			.difficulty(TutorialDifficulty.BEGINNER)
+			.tags(List.of())
+			.requiredBase(BaseTutorial.GEAR_SWITCHING)
+			.status(TutorialStatus.PLACEHOLDER)
+			.build());
+		List<TutorialMetadata> results = registry.search(TutorialCategory.KO_COMBOS, null, null);
+		assertEquals(1, results.size());
+		assertEquals(TutorialId.BOLT_GMAUL_AGS, results.get(0).getId());
+	}
+
 	// ── Helpers ───────────────────────────────────────────────────────────────
 
-	private Tutorial stubTutorial(TutorialId id)
+	private static TutorialMetadata meta(TutorialId id, BaseTutorial base, String name, String desc)
+	{
+		return TutorialMetadata.builder()
+			.id(id)
+			.displayName(name)
+			.description(desc)
+			.category(TutorialCategory.KO_COMBOS)
+			.difficulty(TutorialDifficulty.BEGINNER)
+			.tags(List.of())
+			.requiredBase(base)
+			.status(TutorialStatus.PLACEHOLDER)
+			.build();
+	}
+
+	private static Tutorial stubTutorial(TutorialId id)
 	{
 		return new Tutorial()
 		{
-			@Override public TutorialId getId()                                { return id; }
-			@Override public TutorialState getState()                          { return TutorialState.NONE; }
-			@Override public void start()                                      {}
-			@Override public void onGameTick()                                 {}
-			@Override public void onClientTick()                               {}
-			@Override public void onMenuOptionClicked(MenuOptionClicked e)     {}
-			@Override public void reset()                                      {}
-			@Override public void stop()                                       {}
+			@Override public TutorialId getId()       { return id; }
+			@Override public TutorialState getState() { return TutorialState.NONE; }
+			@Override public void start()             {}
+			@Override public void reset()             {}
+			@Override public void stop()              {}
 		};
 	}
 }

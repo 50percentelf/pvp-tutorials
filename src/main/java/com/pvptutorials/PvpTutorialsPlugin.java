@@ -2,14 +2,13 @@ package com.pvptutorials;
 
 import com.google.inject.Provides;
 import com.pvptutorials.arena.ArenaDetector;
-import com.pvptutorials.arena.BaseTutorial;
 import com.pvptutorials.debug.PeteDebugTracker;
 import com.pvptutorials.menu.PeteTutorialMenu;
 import com.pvptutorials.overlay.DebugOverlay;
 import com.pvptutorials.overlay.TutorialOverlay;
 import com.pvptutorials.simulation.SimulationEngine;
+import com.pvptutorials.tutorial.BuiltInTutorials;
 import com.pvptutorials.tutorial.DeveloperTestTutorial;
-import com.pvptutorials.tutorial.TutorialDefinition;
 import com.pvptutorials.tutorial.TutorialId;
 import com.pvptutorials.tutorial.TutorialManager;
 import com.pvptutorials.tutorial.TutorialRegistry;
@@ -58,9 +57,7 @@ public class PvpTutorialsPlugin extends Plugin
 		overlayManager.add(debugOverlay);
 		overlayManager.add(tutorialOverlay);
 		registerTutorials();
-		// If already logged in (hot-reload), pre-select immediately; otherwise the
-		// LOGGED_IN handler below fires after the login reset clears any earlier selection.
-		if (client.getGameState() == GameState.LOGGED_IN)
+		if (client.getGameState() == GameState.LOGGED_IN && config.autoSelectDevTest())
 		{
 			tutorialManager.requestTutorial(TutorialId.DEVELOPER_TEST);
 		}
@@ -69,9 +66,7 @@ public class PvpTutorialsPlugin extends Plugin
 
 	private void registerTutorials()
 	{
-		tutorialRegistry.define(new TutorialDefinition(
-			TutorialId.DEVELOPER_TEST, BaseTutorial.GEAR_SWITCHING,
-			"Developer Test", "Proves the full plugin architecture end-to-end"));
+		BuiltInTutorials.ALL.forEach(tutorialRegistry::define);
 		tutorialRegistry.register(developerTestTutorial);
 	}
 
@@ -98,7 +93,7 @@ public class PvpTutorialsPlugin extends Plugin
 			simulationEngine.reset();
 			debugTracker.reset();
 		}
-		if (event.getGameState() == GameState.LOGGED_IN)
+		if (event.getGameState() == GameState.LOGGED_IN && config.autoSelectDevTest())
 		{
 			tutorialManager.requestTutorial(TutorialId.DEVELOPER_TEST);
 		}

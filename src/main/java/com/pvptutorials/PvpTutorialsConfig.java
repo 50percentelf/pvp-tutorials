@@ -75,4 +75,16 @@ public interface PvpTutorialsConfig extends Config
 	{
 		return false;
 	}
+
+	@ConfigItem(
+		keyName = "autoSelectDevTest",
+		name = "Auto-select Developer Test",
+		description = "Automatically queue DEVELOPER_TEST on login. Development use only — disable before release.",
+		section = debugSection,
+		position = 5
+	)
+	default boolean autoSelectDevTest()
+	{
+		return false;
+	}
 }

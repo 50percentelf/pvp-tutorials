@@ -58,6 +58,7 @@ public enum TutorialId
 
 	// ── Smite ────────────────────────────────────────────────────────────────
 	SMITE_BASICS("Smite Basics", "Drain opponent prayer with Smite"),
+	SMITE_YOUR_OPPONENT("Smite Your Opponent", "Sustain Smite on an active opponent to drain their prayer"),
 	ANTI_SMITE("Anti-Smite", "Protect prayer while being smited"),
 	PROTECT_SMITE_PROTECT("Protect → Smite → Protect", "Swap between Smite and protection at the right moment"),
 	SMITE_PRESSURE("Smite Pressure", "Maintain sustained Smite drain"),

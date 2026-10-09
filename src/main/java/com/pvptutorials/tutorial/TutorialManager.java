@@ -1,6 +1,8 @@
 package com.pvptutorials.tutorial;
 
 import com.pvptutorials.arena.ArenaDetector;
+import com.pvptutorials.observation.ObservationLayer;
+import com.pvptutorials.observation.TutorialEvent;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.Getter;
@@ -17,13 +19,16 @@ public class TutorialManager
 	@Inject
 	private ArenaDetector arenaDetector;
 
+	@Inject
+	private ObservationLayer observationLayer;
+
 	@Getter
 	private Tutorial activeTutorial = null;
 
 	public void requestTutorial(TutorialId id)
 	{
-		TutorialDefinition def = registry.getDefinition(id);
-		if (def == null)
+		TutorialMetadata meta = registry.getMetadata(id);
+		if (meta == null)
 		{
 			log.warn("Requested undefined tutorial: {}", id);
 			return;
@@ -33,8 +38,8 @@ public class TutorialManager
 			log.warn("Tutorial not yet implemented: {}", id);
 			return;
 		}
-		arenaDetector.getSession().selectTutorial(id, def.getRequiredBase());
-		log.debug("Tutorial selected: {} (requires base={})", id, def.getRequiredBase());
+		arenaDetector.getSession().selectTutorial(id, meta.getRequiredBase());
+		log.debug("Tutorial selected: {} (requires base={})", id, meta.getRequiredBase());
 	}
 
 	public void onArenaActivated()
@@ -73,9 +78,20 @@ public class TutorialManager
 
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
+		if (activeTutorial == null)
+		{
+			return;
+		}
+		observationLayer.fromMenuOptionClicked(event)
+			.ifPresent(this::onTutorialEvent);
+		activeTutorial.onMenuOptionClicked(event);
+	}
+
+	public void onTutorialEvent(TutorialEvent event)
+	{
 		if (activeTutorial != null)
 		{
-			activeTutorial.onMenuOptionClicked(event);
+			activeTutorial.onTutorialEvent(event);
 		}
 	}
 

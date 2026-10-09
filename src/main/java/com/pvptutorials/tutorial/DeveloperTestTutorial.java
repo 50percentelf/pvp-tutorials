@@ -1,23 +1,24 @@
 package com.pvptutorials.tutorial;
 
+import com.pvptutorials.observation.TutorialEvent;
+import com.pvptutorials.observation.TutorialEventType;
 import java.util.List;
-import net.runelite.api.events.MenuOptionClicked;
 
 /**
  * Minimal tutorial that proves the full plugin architecture end-to-end.
- * Requires the GEAR_SWITCHING base arena. Completes after the player performs
- * two equip actions (Wield / Wear / Equip menu options).
+ * Requires the GEAR_SWITCHING base arena.  Completes after the player equips
+ * two items, demonstrating the generic step progression driven by TutorialEvents.
  */
 public class DeveloperTestTutorial implements Tutorial
 {
-	private static final List<String> EQUIP_OPTIONS = List.of("Wield", "Wear", "Equip");
-
 	private TutorialState state = TutorialState.NONE;
 	private int currentStep = 0;
 
 	private final List<TutorialStep> steps = List.of(
-		new TutorialStep("Wield a weapon"),
-		new TutorialStep("Wield another item")
+		new TutorialStep("Wield a weapon",
+			e -> e.getType() == TutorialEventType.ITEM_EQUIPPED),
+		new TutorialStep("Wield another item",
+			e -> e.getType() == TutorialEventType.ITEM_EQUIPPED)
 	);
 
 	@Override
@@ -51,23 +52,16 @@ public class DeveloperTestTutorial implements Tutorial
 	}
 
 	@Override
-	public void onGameTick() {}
-
-	@Override
-	public void onClientTick() {}
-
-	@Override
-	public void onMenuOptionClicked(MenuOptionClicked event)
+	public void onTutorialEvent(TutorialEvent event)
 	{
 		if (state != TutorialState.ACTIVE)
 		{
 			return;
 		}
-		if (!EQUIP_OPTIONS.contains(event.getMenuOption()))
+		if (steps.get(currentStep).isSatisfiedBy(event))
 		{
-			return;
+			advance();
 		}
-		advance();
 	}
 
 	@Override

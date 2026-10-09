@@ -1,14 +1,17 @@
 package com.pvptutorials.tutorial;
 
-import net.runelite.api.events.MenuOptionClicked;
+import com.pvptutorials.observation.TutorialEvent;
+import com.pvptutorials.observation.TutorialEventType;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 public class DeveloperTestTutorialTest
 {
 	private DeveloperTestTutorial tutorial;
+
+	private static final TutorialEvent EQUIP = new TutorialEvent(TutorialEventType.ITEM_EQUIPPED);
+	private static final TutorialEvent OTHER = new TutorialEvent(TutorialEventType.PLAYER_MOVED);
 
 	@Before
 	public void setUp()
@@ -38,51 +41,35 @@ public class DeveloperTestTutorialTest
 	}
 
 	@Test
-	public void wieldAdvancesToSecondStep()
+	public void equipEventAdvancesToSecondStep()
 	{
 		tutorial.start();
-		tutorial.onMenuOptionClicked(menuClick("Wield"));
+		tutorial.onTutorialEvent(EQUIP);
 		assertEquals("Wield another item", tutorial.getActiveInstruction());
 	}
 
 	@Test
-	public void wearAlsoAdvancesStep()
+	public void twoEquipEventsCompletes()
 	{
 		tutorial.start();
-		tutorial.onMenuOptionClicked(menuClick("Wear"));
-		assertEquals("Wield another item", tutorial.getActiveInstruction());
-	}
-
-	@Test
-	public void equipAlsoAdvancesStep()
-	{
-		tutorial.start();
-		tutorial.onMenuOptionClicked(menuClick("Equip"));
-		assertEquals("Wield another item", tutorial.getActiveInstruction());
-	}
-
-	@Test
-	public void twoWieldsCompletes()
-	{
-		tutorial.start();
-		tutorial.onMenuOptionClicked(menuClick("Wield"));
-		tutorial.onMenuOptionClicked(menuClick("Wield"));
+		tutorial.onTutorialEvent(EQUIP);
+		tutorial.onTutorialEvent(EQUIP);
 		assertEquals(TutorialState.COMPLETED, tutorial.getState());
 		assertNull(tutorial.getActiveInstruction());
 	}
 
 	@Test
-	public void nonEquipOptionIgnored()
+	public void nonEquipEventIgnored()
 	{
 		tutorial.start();
-		tutorial.onMenuOptionClicked(menuClick("Use"));
+		tutorial.onTutorialEvent(OTHER);
 		assertEquals("Wield a weapon", tutorial.getActiveInstruction());
 	}
 
 	@Test
-	public void menuClickBeforeStartIgnored()
+	public void eventBeforeStartIgnored()
 	{
-		tutorial.onMenuOptionClicked(menuClick("Wield"));
+		tutorial.onTutorialEvent(EQUIP);
 		assertEquals(TutorialState.NONE, tutorial.getState());
 	}
 
@@ -90,7 +77,7 @@ public class DeveloperTestTutorialTest
 	public void resetReturnsToNone()
 	{
 		tutorial.start();
-		tutorial.onMenuOptionClicked(menuClick("Wield"));
+		tutorial.onTutorialEvent(EQUIP);
 		tutorial.reset();
 		assertEquals(TutorialState.NONE, tutorial.getState());
 		assertNull(tutorial.getActiveInstruction());
@@ -100,7 +87,7 @@ public class DeveloperTestTutorialTest
 	public void canRestartAfterReset()
 	{
 		tutorial.start();
-		tutorial.onMenuOptionClicked(menuClick("Wield"));
+		tutorial.onTutorialEvent(EQUIP);
 		tutorial.reset();
 		tutorial.start();
 		assertEquals("Wield a weapon", tutorial.getActiveInstruction());
@@ -114,12 +101,22 @@ public class DeveloperTestTutorialTest
 		assertEquals(TutorialState.NONE, tutorial.getState());
 	}
 
-	// ── helpers ───────────────────────────────────────────────────────────────
-
-	private static MenuOptionClicked menuClick(String option)
+	@Test
+	public void completedStateHasNoInstruction()
 	{
-		MenuOptionClicked event = mock(MenuOptionClicked.class);
-		when(event.getMenuOption()).thenReturn(option);
-		return event;
+		tutorial.start();
+		tutorial.onTutorialEvent(EQUIP);
+		tutorial.onTutorialEvent(EQUIP);
+		assertNull(tutorial.getActiveInstruction());
+	}
+
+	@Test
+	public void extraEventAfterCompletionIgnored()
+	{
+		tutorial.start();
+		tutorial.onTutorialEvent(EQUIP);
+		tutorial.onTutorialEvent(EQUIP);
+		tutorial.onTutorialEvent(EQUIP);
+		assertEquals(TutorialState.COMPLETED, tutorial.getState());
 	}
 }

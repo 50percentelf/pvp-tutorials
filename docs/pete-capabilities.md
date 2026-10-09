@@ -1,88 +1,188 @@
 # Pete Kayer Tutorial Capability Matrix
 
-Status: PENDING — must be completed before selecting base tutorials for any custom lesson.
+Research findings for each of Pete's official tutorials.
+Populate entries through in-game testing before assigning `requiredBase` in `BuiltInTutorials`.
 
-Instrument each official Pete tutorial using the debug tools in the plugin, then fill in this table.
-
----
-
-## Capability Matrix
-
-For each Pete tutorial, record every capability. Use exact values where possible.
-
-| Capability | Prayer Protection | Power of Freezes | Special Attacks | Gear Switching | Combo Eating | Penultimate Challenge | Final Challenge |
-|---|---|---|---|---|---|---|---|
-| Inventory supplied | ? | ? | ? | ? | ? | ? | ? |
-| Equipment supplied | ? | ? | ? | ? | ? | ? | ? |
-| Equipment freedom | ? | ? | ? | ? | ? | ? | ? |
-| Spec restoration | ? | ? | ? | ? | ? | ? | ? |
-| HP restoration | ? | ? | ? | ? | ? | ? | ? |
-| Prayer restoration | ? | ? | ? | ? | ? | ? | ? |
-| Food replenishment | ? | ? | ? | ? | ? | ? | ? |
-| Potions | ? | ? | ? | ? | ? | ? | ? |
-| Runes | ? | ? | ? | ? | ? | ? | ? |
-| Ammo | ? | ? | ? | ? | ? | ? | ? |
-| Real spellcasting | ? | ? | ? | ? | ? | ? | ? |
-| Freeze behavior | ? | ? | ? | ? | ? | ? | ? |
-| Smite usable | ? | ? | ? | ? | ? | ? | ? |
-| Protect Item usable | ? | ? | ? | ? | ? | ? | ? |
-| Target | ? | ? | ? | ? | ? | ? | ? |
-| Target reset | ? | ? | ? | ? | ? | ? | ? |
-| Damage real | ? | ? | ? | ? | ? | ? | ? |
-| Completion trigger | ? | ? | ? | ? | ? | ? | ? |
-| Movement restrictions | ? | ? | ? | ? | ? | ? | ? |
-| Arena geometry | ? | ? | ? | ? | ? | ? | ? |
-| NPC behavior | ? | ? | ? | ? | ? | ? | ? |
-| Projectiles | ? | ? | ? | ? | ? | ? | ? |
-| Exit behavior | ? | ? | ? | ? | ? | ? | ? |
-| Reset behavior | ? | ? | ? | ? | ? | ? | ? |
+**Status legend**
+- `confirmed` — value verified in-game
+- `observed` — noted but not fully confirmed
+- `unknown` — not yet tested
 
 ---
 
-## Per-Tutorial Conclusions
+## How to use this document
 
-### Prayer Protection
-**Useful for:** ?
-**Limitations:** ?
-
-### Power of Freezes
-**Useful for:** ?
-**Limitations:** ?
-
-### Special Attacks
-**Useful for:** ?
-**Limitations:** ?
-
-### Gear Switching
-**Useful for:** ?
-**Limitations:** ?
-
-### Combo Eating
-**Useful for:** ?
-**Limitations:** ?
-
-### Penultimate Challenge
-**Useful for:** ?
-**Limitations:** ?
-
-### Final Challenge
-**Useful for:** ?
-**Limitations:** ?
+For each custom tutorial being designed, identify which Pete tutorial supplies the
+server-side mechanics you need (specials, freezes, prayer drain, food, etc.).
+Only assign `requiredBase` in `BuiltInTutorials` once the relevant row here is confirmed.
 
 ---
 
-## Recommended Base Tutorial → Custom Tutorial Mapping
+## 1. Gear Switching (`GEAR_SWITCHING`)
 
-Fill in after completing research above.
+**Region:** 10588  
+**Identifying varbit:** 16309 (varpId 5889, value=1 on entry) — confirmed  
+**NPC:** Pete Kayer (id 16577), Sparring partner (id 16609) — observed  
+**Pete greeting:** "In this scenario, you'll master gear switching." — confirmed
 
-| Custom Tutorial | Required Base | Rationale |
+| Capability | Status | Notes |
 |---|---|---|
-| DEVELOPER_TEST | TBD | TBD |
-| RANGE_TO_STAFF | TBD | TBD |
-| MAGE_TO_DHIDE | TBD | TBD |
-| BOLT_GMAUL_AGS | TBD | TBD |
-| BOLT_AGS_GMAUL | TBD | TBD |
-| FREEZE_TO_DHIDE | TBD | TBD |
-| ANTI_SMITE | TBD | TBD |
+| Starting inventory | unknown | |
+| Starting equipment | unknown | |
+| Equipment freedom | unknown | Can you bring/use any gear? |
+| Spec energy | unknown | Initial value, restoration rate |
+| Spec energy restoration | unknown | Per tick / per kill / none |
+| HP | unknown | Starting value, restoration |
+| Prayer | unknown | Starting value, restoration |
+| Food provided | unknown | Type and quantity |
+| Runes provided | unknown | |
+| Ammo provided | unknown | |
+| Potions available | unknown | |
+| Spell availability | unknown | |
+| Freeze support | unknown | Can barrage be cast? |
+| Smite available | unknown | |
+| Protect Item available | unknown | |
+| Attackable target | unknown | Player / NPC / both |
+| Target HP / reset | unknown | Does the target reset HP? |
+| Real damage occurs | unknown | Do hits register server-side? |
+| Completion trigger | unknown | What ends the session? |
+| Movement restrictions | unknown | Bounded arena? |
+| Arena geometry | unknown | Size, obstacles |
+| NPC behaviour | unknown | Does sparring partner attack back? |
+| Exit behaviour | unknown | Teleported out after complete? |
 
-Once this mapping is settled, update `TutorialDefinition` entries in the plugin's startup registry.
+**Priority questions for custom tutorials:**
+- Can we use any equipped weapon or only the supplied ones?
+- Do gear swaps register realistically (animation timing, attack speed)?
+
+---
+
+## 2. Special Attacks (`SPECIAL_ATTACKS`)
+
+**Region:** 10588  
+**Identifying varbit:** 16303 (varpId 5888, value=1 on entry) — confirmed
+
+| Capability | Status | Notes |
+|---|---|---|
+| Starting spec energy | unknown | |
+| Spec restoration rate | unknown | **HIGH PRIORITY** — needed for Bolt→Gmaul→AGS |
+| Spec restoration trigger | unknown | Per tick / kill / unlimited? |
+| Starting inventory | unknown | |
+| Starting equipment | unknown | Are spec weapons provided? |
+| HP | unknown | |
+| Prayer | unknown | |
+| Food / potions | unknown | |
+| Attackable target | unknown | |
+| Target HP / reset | unknown | |
+| Real damage occurs | unknown | |
+| Completion trigger | unknown | |
+| Arena geometry | unknown | |
+
+**Priority questions for custom tutorials:**
+- Does spec energy restore per kill, per time, or is it unlimited?
+- Are spec weapons supplied or must the player bring their own?
+- Can multiple spec weapons be used sequentially in one session?
+
+---
+
+## 3. Prayer Protection (`PRAYER_PROTECTION`)
+
+**Region:** 10588  
+**Identifying varbit:** 10670 (varpId 1021, value=1 on entry) — confirmed
+
+| Capability | Status | Notes |
+|---|---|---|
+| Prayer points | unknown | Starting value |
+| Prayer drain rate | unknown | Is Smite active from NPC? |
+| Prayer restoration | unknown | Restore potions, altar? |
+| Smite availability (player) | unknown | Can the player use Smite? |
+| Protect prayers available | unknown | |
+| Protect Item available | unknown | |
+| Attackable target | unknown | |
+| HP / food | unknown | |
+| Completion trigger | unknown | |
+
+**Priority questions for custom tutorials:**
+- Does the NPC use Smite, allowing prayer drain training?
+- Can the player switch between Smite and protection prayers freely?
+
+---
+
+## 4. Power of Freezes (`POWER_OF_FREEZES`)
+
+**Region:** 10588  
+**Identifying varbit:** 16306 (varpId 5888, value=1 on entry) — confirmed
+
+| Capability | Status | Notes |
+|---|---|---|
+| Runes provided | unknown | Ice barrage / blitz runes? |
+| Freeze spell availability | unknown | |
+| Freeze duration | unknown | Standard (16t barrage / 8t blitz)? |
+| Freeze immune period | unknown | Standard 5t? |
+| Target movement | unknown | Does NPC move freely? |
+| Target freeze acceptance | unknown | Does NPC take the frozen state? |
+| HP / food | unknown | |
+| Prayer | unknown | |
+| Arena geometry | unknown | Large enough for freeze → DD? |
+| Completion trigger | unknown | |
+
+**Priority questions for custom tutorials:**
+- Do freeze spells behave identically to the main game (duration, immune timer)?
+- Is the arena large enough for full movement/spacing drills?
+
+---
+
+## 5. Combo Eating (`COMBO_EATING`)
+
+**Region:** 10588  
+**Identifying varbit:** 16315 (varpId 5890, value=1 on entry) — confirmed
+
+| Capability | Status | Notes |
+|---|---|---|
+| Food provided | unknown | Types (shark, karambwan?) |
+| Food quantity | unknown | |
+| Brew / restore potions | unknown | |
+| HP depletion mechanism | unknown | NPC attacks, scripted drain? |
+| HP restoration per food | unknown | Standard values? |
+| Overeat prevention | unknown | Does the game block over-eating? |
+| Eat timing window | unknown | Standard 3t eat delay? |
+| Completion trigger | unknown | |
+
+**Priority questions for custom tutorials:**
+- Does the tutorial provide karambwan specifically?
+- Is the 3-tick eat delay enforced (same as main game)?
+
+---
+
+## 6. Penultimate Challenge
+
+**Region:** 11100  
+**Identifying varbit:** none observed — requires chat-message detection  
+**Distinguishing chat:** unknown — needs in-game testing
+
+| Capability | Status | Notes |
+|---|---|---|
+| All capabilities | unknown | Region confirmed; content not yet tested |
+
+---
+
+## 7. Final Challenge
+
+**Region:** 11100  
+**Identifying varbit:** none observed — shares region with Penultimate Challenge  
+**Distinguishing chat:** unknown — needs in-game testing
+
+| Capability | Status | Notes |
+|---|---|---|
+| All capabilities | unknown | Region confirmed; content not yet tested |
+
+---
+
+## Research priority order
+
+1. **Special Attacks spec restoration** — blocks all KO combo tutorials
+2. **Gear Switching equipment freedom** — needed for Range→Staff and Mage→D'hide
+3. **Power of Freezes freeze behaviour** — needed for all freeze/movement tutorials
+4. **Combo Eating food types and timing** — needed for eating drills
+5. **Prayer Protection prayer mechanics** — needed for smite tutorials
+6. **Penultimate / Final Challenge distinction** — needed to route those arenas
