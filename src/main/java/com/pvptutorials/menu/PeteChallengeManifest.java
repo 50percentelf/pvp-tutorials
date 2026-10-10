@@ -69,6 +69,48 @@ public final class PeteChallengeManifest
 			.keyPoints(Arrays.asList(
 				"Shark consumed",
 				"Karambwan consumed same tick"))
+			.build(),
+
+		PeteChallengeDefinition.builder()
+			.id(null)
+			.peteRowIndex(0)  // Prayer Protection arena
+			.title("Prayer Flicking")
+			.rowDesc("Activate and deactivate a prayer every tick to preserve points.")
+			.overview("Prayer flicking lets you benefit from a protection prayer without draining prayer points. The drill focuses on consistently activating and deactivating a prayer within a single game tick.")
+			.tips(Arrays.asList(
+				"Click the prayer on the tick you receive an attack, then off immediately",
+				"Use audio cues — the prayer activation sound helps confirm timing"))
+			.keyPoints(Arrays.asList(
+				"Prayer activated on correct tick",
+				"Prayer deactivated before drain"))
+			.build(),
+
+		PeteChallengeDefinition.builder()
+			.id(null)
+			.peteRowIndex(2)  // Special Attacks arena
+			.title("Spec Transfer")
+			.rowDesc("Use a spec weapon and switch back before your next attack.")
+			.overview("Special attack weapons deal high burst damage but require a timely return to your main weapon. This drill trains you to fire a spec and immediately re-equip your main setup within the same or next attack tick.")
+			.tips(Arrays.asList(
+				"Pre-position your spec weapon in a fixed inventory slot",
+				"Switch back the moment your spec animation completes"))
+			.keyPoints(Arrays.asList(
+				"Special attack landed",
+				"Main weapon re-equipped"))
+			.build(),
+
+		PeteChallengeDefinition.builder()
+			.id(null)
+			.peteRowIndex(3)  // Gear Switching arena
+			.title("Veng Timing")
+			.rowDesc("Cast Vengeance on the tick before taking a hit.")
+			.overview("Vengeance only activates on the tick it is cast when you receive damage. This drill trains you to read your opponent's attack animation and cast Vengeance at the exact right moment to reflect maximum damage.")
+			.tips(Arrays.asList(
+				"Learn your opponent's attack animation — it fires 1 tick before the hitsplat",
+				"Cast Veng on the tick the opponent's weapon swings"))
+			.keyPoints(Arrays.asList(
+				"Vengeance cast",
+				"Vengeance triggered on incoming damage"))
 			.build()
 
 	));

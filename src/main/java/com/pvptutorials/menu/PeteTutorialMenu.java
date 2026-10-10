@@ -5,6 +5,7 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,18 @@ public class PeteTutorialMenu
 	private static final int COLOR_ROW_BG    = 0x3E3529;
 	private static final int COLOR_ROW_HOVER = 0x574B3C;
 
+	// Pete's display names used in the detail view (for text override matching).
+	// Keys are component 9 dyn indices (Pete's row order).
+	private static final Map<Integer, String> PETE_ROW_TITLES = Map.of(
+		0, "Prayer Protection",
+		1, "Power of Freezes",
+		2, "Special Attacks",
+		3, "Gear Switching",
+		4, "Combo Eating",
+		5, "Pete's Penultimate Challenge",
+		6, "Pete's Final Challenge"
+	);
+
 	@Inject private Client          client;
 	@Inject private TutorialManager tutorialManager;
 	@Inject private MouseManager    mouseManager;
@@ -54,8 +67,12 @@ public class PeteTutorialMenu
 	private boolean peteOpen                        = false;
 	private boolean treeLogged                      = false;
 
-	private Rectangle               viewportScreenRect    = null;
+	private Rectangle               viewportScreenRect     = null;
 	private PeteChallengeDefinition pendingDetailChallenge = null;
+
+	// detail view override state
+	private boolean detailViewActive      = false;
+	private boolean detailOverrideApplied = false;
 
 	// ── inner type ────────────────────────────────────────────────────────────
 
@@ -90,6 +107,7 @@ public class PeteTutorialMenu
 					&& my >= rowTop && my <= rowBot)
 				{
 					pendingDetailChallenge = row.def;
+					detailOverrideApplied  = false;
 					if (row.def.getId() != null)
 					{
 						tutorialManager.requestTutorial(row.def.getId());
@@ -129,7 +147,8 @@ public class PeteTutorialMenu
 		{
 			log.debug("[PvpTutorials] Widget loaded while Pete open: group={} challenge='{}'",
 				groupId, pendingDetailChallenge.getTitle());
-			// TODO: identify Pete's detail view group and override text here.
+			// If Pete's detail view is a separate group, try to override its text.
+			tryOverrideGroup(groupId);
 		}
 	}
 
@@ -170,6 +189,12 @@ public class PeteTutorialMenu
 					clearInjectedState();
 				}
 			}
+		}
+
+		// After injection check, try to override Pete's detail view if needed.
+		if (pendingDetailChallenge != null)
+		{
+			tryOverrideDetailView();
 		}
 
 		if (!injectedRows.isEmpty()) return;
@@ -226,6 +251,107 @@ public class PeteTutorialMenu
 		}
 	}
 
+	// ── detail view override ──────────────────────────────────────────────────
+
+	private void tryOverrideDetailView()
+	{
+		Widget listContent = client.getWidget(PETE_INTERFACE_GROUP, CONTENT_PANE_COMP);
+		boolean nowDetailView = listContent == null || listContent.isHidden();
+
+		if (nowDetailView != detailViewActive)
+		{
+			detailViewActive      = nowDetailView;
+			detailOverrideApplied = false;
+			if (nowDetailView)
+			{
+				log.debug("[PvpTutorials] Pete detail view opened (challenge='{}')",
+					pendingDetailChallenge.getTitle());
+				logDetailViewWidgets();
+			}
+		}
+
+		if (!detailViewActive || detailOverrideApplied) return;
+
+		if (overrideDetailViewText())
+		{
+			detailOverrideApplied = true;
+		}
+	}
+
+	// Scan group 970 flat components for Pete's arena title and replace with custom text.
+	private boolean overrideDetailViewText()
+	{
+		if (pendingDetailChallenge == null) return false;
+
+		String peteTitle = PETE_ROW_TITLES.get(pendingDetailChallenge.getPeteRowIndex());
+		if (peteTitle == null) return false;
+
+		boolean found = false;
+		for (int i = 0; i < 512; i++)
+		{
+			Widget w = client.getWidget(PETE_INTERFACE_GROUP, i);
+			if (w == null) break;
+			if (replaceText(w, peteTitle, pendingDetailChallenge)) found = true;
+
+			Widget[] dc = w.getDynamicChildren();
+			if (dc != null)
+			{
+				for (Widget dw : dc)
+				{
+					if (replaceText(dw, peteTitle, pendingDetailChallenge)) found = true;
+				}
+			}
+			Widget[] sc = w.getStaticChildren();
+			if (sc != null)
+			{
+				for (Widget sw : sc)
+				{
+					if (replaceText(sw, peteTitle, pendingDetailChallenge)) found = true;
+				}
+			}
+		}
+		return found;
+	}
+
+	private boolean replaceText(Widget w, String peteTitle, PeteChallengeDefinition def)
+	{
+		if (w == null || w.isHidden() || w.getType() != WidgetType.TEXT) return false;
+		String text = w.getText();
+		if (text == null || !text.contains(peteTitle)) return false;
+
+		w.setText(def.getTitle());
+		w.revalidate();
+		log.debug("[PvpTutorials] Replaced '{}' → '{}' on widget id=0x{}", text, def.getTitle(),
+			Integer.toHexString(w.getId()));
+		return true;
+	}
+
+	// Attempt to override text in a group that just loaded (in case Pete's detail view is a separate group).
+	private void tryOverrideGroup(int groupId)
+	{
+		if (pendingDetailChallenge == null) return;
+		String peteTitle = PETE_ROW_TITLES.get(pendingDetailChallenge.getPeteRowIndex());
+		if (peteTitle == null) return;
+
+		boolean found = false;
+		for (int i = 0; i < 512; i++)
+		{
+			Widget w = client.getWidget(groupId, i);
+			if (w == null) break;
+			if (replaceText(w, peteTitle, pendingDetailChallenge)) found = true;
+
+			Widget[] dc = w.getDynamicChildren();
+			if (dc != null) for (Widget dw : dc) if (replaceText(dw, peteTitle, pendingDetailChallenge)) found = true;
+			Widget[] sc = w.getStaticChildren();
+			if (sc != null) for (Widget sw : sc) if (replaceText(sw, peteTitle, pendingDetailChallenge)) found = true;
+		}
+
+		if (!found)
+		{
+			logGroupWidgets(groupId);
+		}
+	}
+
 	// ── injection ─────────────────────────────────────────────────────────────
 
 	private void injectInto(Widget[] group)
@@ -240,7 +366,6 @@ public class PeteTutorialMenu
 		Widget[] dyn = contentPane.getDynamicChildren();
 		dynCountBeforeInjection = dyn != null ? dyn.length : 0;
 
-		Widget scrollContent = findParent(group, contentPane);
 		int paneW      = contentPane.getWidth();
 		int listBottom = computeInsertY(contentPane);
 
@@ -327,9 +452,6 @@ public class PeteTutorialMenu
 		}
 
 		// ── Interactive overlays into component 9 (duplicated Pete rows) ─────
-		// We copy type, position, click mask, actions, and op listener from the
-		// source Pete row. param0/param1 are not exposed by the RuneLite API;
-		// the op listener (CS2 script) is copied instead, which handles routing.
 		Widget interactiveLayer = client.getWidget(PETE_INTERFACE_GROUP, INTERACTIVE_COMP);
 		if (interactiveLayer != null)
 		{
@@ -345,10 +467,8 @@ public class PeteTutorialMenu
 					continue;
 				}
 				Widget src = interactiveDyn[peteRowIdx];
-				if (src == null)
-				{
-					continue;
-				}
+				if (src == null) continue;
+
 				int rowY = firstRowY + i * ROW_H;
 
 				Widget overlay = interactiveLayer.createChild(-1, src.getType());
@@ -363,26 +483,18 @@ public class PeteTutorialMenu
 				{
 					for (int a = 0; a < srcActions.length; a++)
 					{
-						if (srcActions[a] != null)
-						{
-							overlay.setAction(a, srcActions[a]);
-						}
+						if (srcActions[a] != null) overlay.setAction(a, srcActions[a]);
 					}
 				}
 
 				Object[] opListener = src.getOnOpListener();
-				if (opListener != null)
-				{
-					overlay.setOnOpListener(opListener);
-				}
+				if (opListener != null) overlay.setOnOpListener(opListener);
 
 				overlay.setHasListener(true);
 				overlay.revalidate();
 
-				log.debug("[PvpTutorials] Duplicated comp9 dyn[{}] (clickMask={} opListener={} actions={}) -> rowY={} for '{}'",
-					peteRowIdx, src.getClickMask(),
-					opListener != null ? opListener[0] : "none",
-					src.getActions() != null ? src.getActions().length : 0,
+				log.debug("[PvpTutorials] Duplicated comp9 dyn[{}] (clickMask={} opListener={}) -> rowY={} for '{}'",
+					peteRowIdx, src.getClickMask(), opListener != null ? opListener[0] : "none",
 					rowY, def.getTitle());
 			}
 		}
@@ -392,20 +504,22 @@ public class PeteTutorialMenu
 		}
 
 		// ── Activate scrollbar ────────────────────────────────────────────────
-		int compHeight  = contentPane.getHeight() > 0 ? contentPane.getHeight() : 555;
-		int totalNeeded = Math.max(firstRowY + challenges.size() * ROW_H + 5, compHeight + 1);
-		if (scrollContent != null)
+		// Set scrollHeight on the scroll viewport (comp 7) directly so the
+		// scrollbar activates when content exceeds the 555px visible area.
+		int totalNeeded = firstRowY + challenges.size() * ROW_H + 20;
+		Widget scrollViewport = client.getWidget(PETE_INTERFACE_GROUP, SCROLL_PANE_COMP);
+		if (scrollViewport != null)
 		{
-			scrollContent.setScrollHeight(totalNeeded);
-			scrollContent.revalidate();
+			scrollViewport.setScrollHeight(totalNeeded);
+			scrollViewport.revalidateScroll();
 		}
 		contentPane.setScrollHeight(totalNeeded);
-		contentPane.revalidate();
+		contentPane.revalidateScroll();
 
 		updateViewportScreenRect();
 
-		log.debug("[PvpTutorials] Injected {} rows — dynBefore={} listBottom={} firstRowY={}",
-			challenges.size(), dynCountBeforeInjection, listBottom, firstRowY);
+		log.debug("[PvpTutorials] Injected {} rows — dynBefore={} listBottom={} firstRowY={} totalNeeded={}",
+			challenges.size(), dynCountBeforeInjection, listBottom, firstRowY, totalNeeded);
 	}
 
 	// ── helpers ───────────────────────────────────────────────────────────────
@@ -416,6 +530,8 @@ public class PeteTutorialMenu
 		dynCountBeforeInjection  = -1;
 		viewportScreenRect       = null;
 		pendingDetailChallenge   = null;
+		detailViewActive         = false;
+		detailOverrideApplied    = false;
 	}
 
 	private void updateViewportScreenRect()
@@ -444,16 +560,6 @@ public class PeteTutorialMenu
 			w = p;
 		}
 		viewportScreenRect = new Rectangle(sx, sy, viewport.getWidth(), viewport.getHeight());
-	}
-
-	private Widget findParent(Widget[] group, Widget child)
-	{
-		int parentComp = child.getParentId() & 0xFFFF;
-		if (parentComp > 0 && parentComp < group.length && group[parentComp] != null)
-		{
-			return group[parentComp];
-		}
-		return null;
 	}
 
 	private Widget findContentPane(Widget[] group)
@@ -560,6 +666,47 @@ public class PeteTutorialMenu
 			}
 		}
 		log.debug("{}", sb);
+	}
+
+	private void logDetailViewWidgets()
+	{
+		StringBuilder sb = new StringBuilder("[PvpTutorials] Detail view widget scan (group 970):");
+		for (int i = 0; i < 512; i++)
+		{
+			Widget w = client.getWidget(PETE_INTERFACE_GROUP, i);
+			if (w == null) break;
+			appendTextWidgets(sb, w, i, -1);
+			Widget[] dc = w.getDynamicChildren();
+			if (dc != null) for (int d = 0; d < dc.length; d++) appendTextWidgets(sb, dc[d], i, d);
+			Widget[] sc = w.getStaticChildren();
+			if (sc != null) for (int d = 0; d < sc.length; d++) appendTextWidgets(sb, sc[d], i, -2 - d);
+		}
+		log.debug("{}", sb);
+	}
+
+	private void logGroupWidgets(int groupId)
+	{
+		StringBuilder sb = new StringBuilder(
+			String.format("[PvpTutorials] Candidate detail group %d widget scan:", groupId));
+		for (int i = 0; i < 512; i++)
+		{
+			Widget w = client.getWidget(groupId, i);
+			if (w == null) break;
+			appendTextWidgets(sb, w, i, -1);
+			Widget[] dc = w.getDynamicChildren();
+			if (dc != null) for (int d = 0; d < dc.length; d++) appendTextWidgets(sb, dc[d], i, d);
+		}
+		log.debug("{}", sb);
+	}
+
+	private void appendTextWidgets(StringBuilder sb, Widget w, int comp, int dyn)
+	{
+		if (w == null || w.getType() != WidgetType.TEXT) return;
+		String text = w.getText();
+		if (text == null || text.isEmpty()) return;
+		String loc = dyn == -1 ? String.valueOf(comp) : (comp + ".dyn[" + dyn + "]");
+		sb.append(String.format("%n  [%s] hidden=%b text='%s' origX=%d origY=%d w=%d h=%d",
+			loc, w.isHidden(), text, w.getOriginalX(), w.getOriginalY(), w.getWidth(), w.getHeight()));
 	}
 
 	public boolean isInjected()
