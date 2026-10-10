@@ -5,7 +5,6 @@ import com.pvptutorials.arena.ArenaDetector;
 import com.pvptutorials.debug.PeteDebugTracker;
 import com.pvptutorials.menu.PeteTutorialMenu;
 import com.pvptutorials.overlay.DebugOverlay;
-import com.pvptutorials.overlay.PeteChallengeDetailOverlay;
 import com.pvptutorials.overlay.TutorialOverlay;
 import com.pvptutorials.simulation.SimulationEngine;
 import com.pvptutorials.tutorial.BuiltInTutorials;
@@ -51,9 +50,8 @@ public class PvpTutorialsPlugin extends Plugin
 	@Inject private TutorialRegistry       tutorialRegistry;
 	@Inject private PeteTutorialMenu       peteTutorialMenu;
 	@Inject private SimulationEngine       simulationEngine;
-	@Inject private DebugOverlay              debugOverlay;
-	@Inject private TutorialOverlay           tutorialOverlay;
-	@Inject private PeteChallengeDetailOverlay peteChallengeDetailOverlay;
+	@Inject private DebugOverlay    debugOverlay;
+	@Inject private TutorialOverlay tutorialOverlay;
 	@Inject private DeveloperTestTutorial  developerTestTutorial;
 	@Inject private RangeToStaffTutorial   rangeToStaffTutorial;
 
@@ -62,7 +60,6 @@ public class PvpTutorialsPlugin extends Plugin
 	{
 		overlayManager.add(debugOverlay);
 		overlayManager.add(tutorialOverlay);
-		overlayManager.add(peteChallengeDetailOverlay);
 		peteTutorialMenu.startListening();
 		registerTutorials();
 		if (client.getGameState() == GameState.LOGGED_IN && config.autoSelectDevTest())
@@ -84,7 +81,6 @@ public class PvpTutorialsPlugin extends Plugin
 	{
 		overlayManager.remove(debugOverlay);
 		overlayManager.remove(tutorialOverlay);
-		overlayManager.remove(peteChallengeDetailOverlay);
 		peteTutorialMenu.stopListening();
 		tutorialManager.stopActiveTutorial();
 		arenaDetector.reset();

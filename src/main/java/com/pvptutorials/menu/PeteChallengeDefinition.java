@@ -14,6 +14,7 @@ import lombok.Value;
 public class PeteChallengeDefinition
 {
 	TutorialId id;       // null → stub (shows "Coming Soon")
+	int peteRowIndex;    // index into component 9's dyn array for the matching Pete challenge row
 	String title;
 	String rowDesc;      // one-line description shown in the list row
 	String overview;     // paragraph shown in the detail view

@@ -17,6 +17,7 @@ public final class PeteChallengeManifest
 
 		PeteChallengeDefinition.builder()
 			.id(TutorialId.RANGE_TO_STAFF)
+			.peteRowIndex(3)  // Gear Switching arena
 			.title("Range to Staff")
 			.rowDesc("Attack at range, then equip your staff.")
 			.overview("Transition from ranged to magic combat by landing a ranged hit on your target, then immediately equipping a magic staff. This drill trains the weapon swap that opens most mage-based combos.")
@@ -30,6 +31,7 @@ public final class PeteChallengeManifest
 
 		PeteChallengeDefinition.builder()
 			.id(TutorialId.STAFF_TO_RANGE)
+			.peteRowIndex(3)  // Gear Switching arena
 			.title("Staff to Range")
 			.rowDesc("Cast a spell, then switch to your ranged setup.")
 			.overview("After landing a magic spell, swap to your ranged gear to apply pressure with a different attack style. This is the reverse transition to Range → Staff and is essential for tribrid play.")
@@ -43,6 +45,7 @@ public final class PeteChallengeManifest
 
 		PeteChallengeDefinition.builder()
 			.id(TutorialId.FREEZE_TO_DHIDE)
+			.peteRowIndex(1)  // Power of Freezes arena
 			.title("Freeze to D'hide")
 			.rowDesc("Land a freeze, then switch to dragonhide armour.")
 			.overview("Freeze your opponent with an ice spell and immediately switch into dragonhide armour to tank the incoming ranged retaliation. This transition is a core defensive move after committing a freeze.")
@@ -56,6 +59,7 @@ public final class PeteChallengeManifest
 
 		PeteChallengeDefinition.builder()
 			.id(TutorialId.SHARK_KARAMBWAN)
+			.peteRowIndex(4)  // Combo Eating arena
 			.title("Shark + Karambwan")
 			.rowDesc("Combo eat: shark then karambwan in the same tick.")
 			.overview("Eat a shark and a karambwan in the same game tick to recover a large amount of HP without losing an attack. Combo eating is one of the most impactful mechanical skills in PvP and this drill isolates the timing.")
